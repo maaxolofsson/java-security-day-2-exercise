@@ -1,11 +1,14 @@
 package com.booleanuk.api.security;
 
+import com.booleanuk.api.model.ERole;
+import com.booleanuk.api.model.Role;
 import com.booleanuk.api.security.jwt.AuthEntryPointJwt;
 import com.booleanuk.api.security.jwt.AuthTokenFilter;
 import com.booleanuk.api.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -53,8 +56,11 @@ public class WebSecurityConfig {
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/library", "/library/**").authenticated()
+                        .requestMatchers("/auth/**").permitAll() // all incoming requests
+                        .requestMatchers(HttpMethod.GET, "/items", "/items/**").authenticated() // all users (admin + normal user)
+                        .requestMatchers(HttpMethod.POST, "/items", "/items/**").hasAuthority(ERole.ADMIN.toString()) // only admin
+                        .requestMatchers(HttpMethod.PUT, "/items", "/items/**").hasAuthority(ERole.ADMIN.toString()) // only admin
+                        .requestMatchers(HttpMethod.DELETE, "/items", "/items/**").hasAuthority(ERole.ADMIN.toString()) // only admin
                 );
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
