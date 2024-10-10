@@ -56,20 +56,18 @@ public class WebSecurityConfig {
                 .exceptionHandling((exception) -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
-                                //.requestMatchers("/", "/**", "/*").permitAll() // TODO: delete, just for making testing functionality easier
-
                         .requestMatchers("/auth/**").permitAll() // all incoming requests
                         .requestMatchers(HttpMethod.GET, "/items", "/items/**").authenticated() // all users (admin + normal user)
                         .requestMatchers(HttpMethod.POST, "/items", "/items/**").hasAuthority(ERole.ADMIN.toString()) // only admin
                         .requestMatchers(HttpMethod.PUT, "/items", "/items/**").hasAuthority(ERole.ADMIN.toString()) // only admin
                         .requestMatchers(HttpMethod.DELETE, "/items", "/items/**").hasAuthority(ERole.ADMIN.toString()) // only admin
 
-                        // TODO: add request matchers for lends
-                        .requestMatchers(HttpMethod.GET, "{userId}/lend").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/lend/{itemId}").hasAuthority(ERole.ADMIN.toString())
+                        .requestMatchers(HttpMethod.GET, "/lend/user/{userId}").hasAuthority(ERole.USER.toString())
                         .requestMatchers(HttpMethod.POST, "/lend").hasAuthority(ERole.USER.toString())
                         .requestMatchers(HttpMethod.POST, "/lend/return").hasAuthority(ERole.USER.toString())
-                        .requestMatchers(HttpMethod.POST, ("/lend/{itemId}")).hasAuthority(ERole.ADMIN.toString())
+
+                        .requestMatchers(HttpMethod.GET, ("/lend/{userId}/*")).hasAuthority(ERole.ADMIN.toString())
+                        .requestMatchers(HttpMethod.GET, ("/lend/item/{itemId}")).hasAuthority(ERole.ADMIN.toString())
                 );
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

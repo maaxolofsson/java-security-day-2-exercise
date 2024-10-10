@@ -122,7 +122,23 @@ public class LendController {
         return new ResponseEntity<>(lendListResponse, HttpStatus.OK);
     }
 
-    @GetMapping("{itemId}") // This should be accessible only to admins
+    @GetMapping("user/{userId}")
+    public ResponseEntity<Response<?>> getLendsByUser(@PathVariable int userId){
+        User user = this.users.findById(userId).orElse(null);
+
+        if(user == null){
+            ErrorResponse errorResponse = new ErrorResponse("not found");
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+
+        List<Lend> toReturn = this.lends.findAllByUserId(userId);
+
+        LendListResponse lendListResponse = new LendListResponse();
+        lendListResponse.set(toReturn);
+        return new ResponseEntity<>(lendListResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("item/{itemId}") // This should be accessible only to admins
     public ResponseEntity<Response<?>> getLendsByItem(@PathVariable int itemId){
         Item item = this.items.findById(itemId).orElse(null);
 

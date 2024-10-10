@@ -13,4 +13,6 @@ public interface LendRepository extends JpaRepository<Lend, Integer> {
     public Lend findByUserIdAndItemId(int userId, int itemId);
 
     public List<Lend> findAllByItemId(int itemId);
+
+    public List<Lend> findAllByUserId(int userId);
 }
